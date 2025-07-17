@@ -1,0 +1,7 @@
+{
+  "name": "rolelogger",
+  "description": "Logs changes in roles.",
+  "author": "joksulainen",
+  "config": {},
+  "commands": []
+}
