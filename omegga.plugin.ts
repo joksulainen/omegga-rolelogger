@@ -11,8 +11,11 @@ const logFolder = './logs/roles/';
 
 function validateLogFolder() {
   if (fs.existsSync(logFolder)) {return;}
-  fs.mkdirSync(logFolder, { recursive: true });
-  console.log("Created log folder");
+  fs.mkdir(logFolder, { recursive: true }, (err) => {
+    if (!err) {
+      console.log("Created log folder");
+    }
+  });
 }
 
 export default class Plugin implements OmeggaPlugin<Config, Storage> {
