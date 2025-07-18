@@ -5,8 +5,8 @@ type Config = {};
 type Storage = {};
 
 const dateRegEx = /^\[(?<date>\d{4}\.\d\d\.\d\d-\d\d\.\d\d\.\d\d:\d{3})\]\[\s*\d+\]/;
-const roleURegEx = /^\[(?<date>\d{4}\.\d\d\.\d\d-\d\d\.\d\d\.\d\d:\d{3})\]\[\s*\d+\]LogChat: (?<log>(?<target>.*(?<!:)) (?:\(not present\) )+?(?:has become|is no longer) (?<role>.*) \((?<action>granted|revoked) by (?<actor>.*)\))$/;
-const roleMRegEx = /^\[(?<date>\d{4}\.\d\d\.\d\d-\d\d\.\d\d\.\d\d:\d{3})\]\[\s*\d+\]LogChat: (?<log>(?<actor>.*(?<!:)) (?<action>created|updated|removed) the (?<role>.*) role\.)$/;
+const roleURegEx = /^\[(?<date>\d{4}\.\d\d\.\d\d-\d\d\.\d\d\.\d\d:\d{3})\]\[\s*\d+\]LogChat: (?<log>(?<target>[^:]+?)(?<targetp> \(not present\))? (?:has become|is no longer) (?<role>.+) \((?<action>granted|revoked) by (?<actor>.+)\))$/;
+const roleMRegEx = /^\[(?<date>\d{4}\.\d\d\.\d\d-\d\d\.\d\d\.\d\d:\d{3})\]\[\s*\d+\]LogChat: (?<log>(?<actor>[^:]+?) (?<action>created|updated|removed) the (?<role>.+) role\.)$/;
 const logFolder = './logs/roles/';
 
 function validateLogFolder() {
