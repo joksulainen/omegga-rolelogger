@@ -567,7 +567,7 @@ export declare const _OMEGGA_UTILS_IMPORT: {
 	time: {
 		parseDuration: typeof parseDuration;
 		parseBrickadiaTime: typeof parseBrickadiaTime;
-		debounce: (<T extends (... /** Player information, id, name, controller, and pawn */args: any) => any>(func: T, wait: number | undefined, options?: DebounceSettingsLeading) => DebouncedFuncLeading<T>) | (<T extends (...args: any) => any>(func: T, wait?: number, options?: DebounceSettings) => DebouncedFunc<T>);
+		debounce: (<T extends (...args: any) => any>(func: T, wait: number | undefined, options?: DebounceSettingsLeading) => DebouncedFuncLeading<T>) | (<T extends (...args: any) => any>(func: T, wait?: number, options?: DebounceSettings) => DebouncedFunc<T>);
 	};
 	map: {
 		DEFAULT_MAPS: {
@@ -693,10 +693,8 @@ export interface BrickInteraction {
 /** AutoRestart options */
 export type AutoRestartConfig = {
 	players: boolean;
-	bricks: boolean;
-	minigames: boolean;
-	environment: boolean;
 	announcement: boolean;
+	saveWorld: boolean;
 };
 export interface OmeggaPlayer {
 	/** player name */
@@ -1044,6 +1042,7 @@ export interface OmeggaCore {
 	getPlayers(): {
 		id: string;
 		name: string;
+		displayName: string;
 		controller: string;
 		state: string;
 	}[];
@@ -1267,25 +1266,25 @@ export interface OmeggaCore {
 	 * Load a world by its name
 	 * @param worldName World name
 	 */
-	loadWorld(worldName: string): void;
+	loadWorld(worldName: string): Promise<boolean>;
 	/**
 	 * Load a world at a specific revision
 	 * @param worldName World name
 	 */
-	loadWorldRevision(worldName: string, revision: number): void;
+	loadWorldRevision(worldName: string, revision: number): Promise<boolean>;
 	/**
 	 * Save a world as a new name
 	 * @param worldName World name
 	 */
-	saveWorldAs(worldName: string): void;
+	saveWorldAs(worldName: string): Promise<boolean>;
 	/**
 	 * Save the current world
 	 */
-	saveWorld(): void;
+	saveWorld(): Promise<boolean>;
 	/**
 	 * Create an empty world with the given name
 	 */
-	createEmptyWorld(worldName: string): void;
+	createEmptyWorld(worldName: string): Promise<boolean>;
 	/**
 	 * unsafely load save data (wrap in try/catch)
 	 * @param saveName save file name
