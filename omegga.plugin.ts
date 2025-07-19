@@ -18,15 +18,6 @@ const rUserRegEx = /^.+LogChat: (?<target>[^:]+?)(?<targetp> \(not present\))? (
 // [2025.07.17-10.09.16:679][453]LogChat: joksulainen removed the New Role 0 role.
 const rManageRegEx = /^.+LogChat: (?<actor>[^:]+?) (?<action>created|updated|removed) the (?<role>.+) role\.$/;
 
-function validateLogFolder() {
-  if (fs.existsSync(logFolder)) return;
-  fs.mkdir(logFolder, { recursive: true }, err => {
-    if (!err) {
-      console.log('Created log folder');
-    }
-  });
-}
-
 function findPlayersByExactDisplayName(name: string): OmeggaPlayer[] {
   let result: OmeggaPlayer[] = Array<OmeggaPlayer>();
   
@@ -63,7 +54,12 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   }
   
   async init() {
-    validateLogFolder();
+    if (fs.existsSync(logFolder)) return;
+    fs.mkdir(logFolder, { recursive: true }, err => {
+      if (!err) {
+        console.log('Created log folder');
+      }
+    });
     
     this.omegga.on('line', logLine => {
       const matchTimestamp = logLine.match(tsRegEx);
