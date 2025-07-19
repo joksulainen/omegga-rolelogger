@@ -59,12 +59,13 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   
   async init() {
     // create log folder if it doesnt exist
-    if (fs.existsSync(logFolder)) return;
-    fs.mkdir(logFolder, { recursive: true }, err => {
-      if (!err) {
-        console.log('Created log folder');
-      }
-    });
+    if (!fs.existsSync(logFolder)) {
+      fs.mkdir(logFolder, { recursive: true }, err => {
+        if (!err) {
+          console.log('Created log folder');
+        }
+      });
+    }
     
     // add listener to listen for brickadia log lines
     this.omegga.on('line', logLine => {
