@@ -2,11 +2,14 @@ import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from 'omegga';
 import fs from 'fs';
 
 
+// plugin config and storage (unused)
 type Config = {};
 type Storage = {};
 
+// location for logs
 const logFolder = './logs/roles/';
 
+// regex stuff
 const tsRegEx = /^\[(\d{4}\.\d\d\.\d\d-\d\d\.\d\d\.\d\d:\d{3})\]\[\s*\d+\]/;
 
 // [2025.07.17-07.48.43:644][996]LogChat: joksulainen has become Moderator (granted by joksulainen)
@@ -18,6 +21,7 @@ const rUserRegEx = /^.+LogChat: (?<target>[^:]+?)(?<targetp> \(not present\))? (
 // [2025.07.17-10.09.16:679][453]LogChat: joksulainen removed the New Role 0 role.
 const rManageRegEx = /^.+LogChat: (?<actor>[^:]+?) (?<action>created|updated|removed) the (?<role>.+) role\.$/;
 
+// helper functions
 function findPlayersByExactDisplayName(name: string): OmeggaPlayer[] {
   let result: OmeggaPlayer[] = Array<OmeggaPlayer>();
   
@@ -54,6 +58,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   }
   
   async init() {
+    // create log folder if it doesnt exist
     if (fs.existsSync(logFolder)) return;
     fs.mkdir(logFolder, { recursive: true }, err => {
       if (!err) {
@@ -61,15 +66,19 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       }
     });
     
+    // add listener to listen for brickadia log lines
     this.omegga.on('line', logLine => {
       const matchTimestamp = logLine.match(tsRegEx);
       if (!matchTimestamp) return;
       const ts = matchTimestamp[1];
       
+      // match for user role log entry
       const matchUser = logLine.match(rUserRegEx);
       if (matchUser) {
+        // unpack named capture groups
         const { target, targetp, actiont, role, action, actor } = matchUser.groups;
         
+        // compile array of target usernames that have the given display name
         let targetNames: string = undefined;
         
         if (!targetp) {
@@ -77,33 +86,43 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
           targetNames = playerArrayToString(targetPlayers);
         }
         
+        // compile array of actor usernames that have the given display name
         const actorPlayers = findPlayersByExactDisplayName(actor);
         
-        // uncomment when missing permissions for default roles get inserted in getPermissions()
+        // filter out players with insufficient permissions
+        // ! uncomment when missing permissions for default roles get inserted in getPermissions()
         // actorPlayers.filter((player, _, __) => {
         //   return player.getPermissions()['BR.Permission.GrantRoles'];
         // });
         
+        // construct string to display in log
         const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
         
+        // write log to file
         const log = `[${ts}] ${target}${targetp ?? ' ' + targetNames} ${actiont} ${role} (${action} by ${actor}${actorNames ? ' ' + actorNames : ''})\n`;
         fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
-        return;
+        return; // we cant match a log entry to a different type than that which was matched
       }
       
+      // match for role management log entry
       const matchManage = logLine.match(rManageRegEx);
       if (matchManage) {
+        // unpack named capture groups
         const { actor, action, role } = matchManage.groups;
         
+        // compile array of actor usernames that have the given display name
         const actorPlayers = findPlayersByExactDisplayName(actor);
         
-        // uncomment when missing permissions for default roles get inserted in getPermissions()
+        // filter out players with insufficient permissions
+        // ! uncomment when missing permissions for default roles get inserted in getPermissions()
         // actorPlayers.filter((player, _, __) => {
         //   return player.getPermissions()['BR.Permission.EditRoles'];
         // });
         
+        // construct string to display in log
         const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
         
+        // write log to file
         const log = `[${ts}] ${actor}${actorNames ? ' ' + actorNames : ''} ${action} the ${role} role\n`;
         fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
       }
