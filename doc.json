@@ -1,6 +1,6 @@
 {
   "name": "rolelogger",
-  "description": "Logs changes in roles.",
+  "description": "A simple plugin that logs role events.",
   "author": "joksulainen",
   "config": {},
   "commands": []
