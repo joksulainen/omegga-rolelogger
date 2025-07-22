@@ -2,8 +2,12 @@ import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from 'omegga';
 import fs from 'fs';
 
 
-// plugin config and storage (unused)
-type Config = {};
+// plugin config and storage
+type Config = {
+  ignore_roles: string[]
+  emphasize_roles: string[]
+};
+
 type Storage = {};
 
 // location for logs
@@ -79,6 +83,10 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         // unpack named capture groups
         const { target, targetp, actiont, role, action, actor } = matchUser.groups;
         
+        // end early if the role is ignored and not emphasized
+        const rEmphasized = this.config.emphasize_roles.includes(role);
+        if (this.config.ignore_roles.includes(role) && !rEmphasized) return;
+        
         // compile array of target usernames that have the given display name
         let targetNames: string = undefined;
         
@@ -100,7 +108,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
         
         // write log to file
-        const log = `[${ts}] ${target}${targetp ?? ' ' + targetNames} ${actiont} ${role} (${action} by ${actor}${actorNames ? ' ' + actorNames : ''})\n`;
+        const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${target}${targetp ?? ' ' + targetNames} ${actiont} ${role} (${action} by ${actor} ${actorNames})\n${rEmphasized ? '\x1b[0m' : ''}`;
         fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
         return; // we cant match a log entry to a different type than that which was matched
       }
@@ -110,6 +118,10 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       if (matchManage) {
         // unpack named capture groups
         const { actor, action, role } = matchManage.groups;
+        
+        // end early if the role is ignored and not emphasized
+        const rEmphasized = this.config.emphasize_roles.includes(role);
+        if (this.config.ignore_roles.includes(role) && !rEmphasized) return;
         
         // compile array of actor usernames that have the given display name
         const actorPlayers = findPlayersByExactDisplayName(actor);
@@ -124,7 +136,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
         const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
         
         // write log to file
-        const log = `[${ts}] ${actor}${actorNames ? ' ' + actorNames : ''} ${action} the ${role} role\n`;
+        const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${actor} ${actorNames} ${action} the ${role} role\n${rEmphasized ? '\x1b[0m' : ''}`;
         fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
       }
     });

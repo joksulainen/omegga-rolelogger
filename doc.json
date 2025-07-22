@@ -2,6 +2,19 @@
   "name": "rolelogger",
   "description": "A simple plugin that logs role events.",
   "author": "joksulainen",
-  "config": {},
+  "config": {
+    "emphasize_roles": {
+      "type": "list",
+      "itemType": "role",
+      "description": "Roles that should be logged with more emphasis. Takes precedence over ignore.",
+      "default": []
+    },
+    "ignore_roles": {
+      "type": "list",
+      "itemType": "role",
+      "description": "Roles that shouldn't be logged.",
+      "default": []
+    }
+  },
   "commands": []
 }
