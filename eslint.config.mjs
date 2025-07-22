@@ -25,6 +25,13 @@ export default tseslint.config(
       '@stylistic/no-trailing-spaces': 'off',
       '@stylistic/no-multiple-empty-lines': 'off',
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
+      'no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
     },
   },
 );

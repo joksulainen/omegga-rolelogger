@@ -90,7 +90,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       
       // filter out players with insufficient permissions
       // ! uncomment when missing permissions for default roles get inserted in getPermissions()
-      // actorPlayers.filter((player, _, __) => {
+      // actorPlayers.filter((player, _index, _array) => {
       //   return player.getPermissions()['BR.Permission.GrantRoles'];
       // });
       
@@ -118,7 +118,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       
       // filter out players with insufficient permissions
       // ! uncomment when missing permissions for default roles get inserted in getPermissions()
-      // actorPlayers.filter((player, _, __) => {
+      // actorPlayers.filter((player, _index, _array) => {
       //   return player.getPermissions()['BR.Permission.EditRoles'];
       // });
       
