@@ -50,6 +50,10 @@ function playerArrayToString(array: OmeggaPlayer[]): string {
   return string;
 }
 
+function ansiWrapper(ansi: string, string: string): string {
+  return ansi + string + '\x1b[0m';
+}
+
 export default class Plugin implements OmeggaPlugin<Config, Storage> {
   omegga: OL;
   config: PC<Config>;
@@ -98,8 +102,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
       
       // write log to file
-      const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${target}${targetp ?? ' ' + targetNames} ${actiont} ${role} (${action} by ${actor} ${actorNames})\n${rEmphasized ? '\x1b[0m' : ''}`;
-      fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
+      const log = `[${ts}] ${target}${targetp ?? ' ' + targetNames} ${actiont} ${role} (${action} by ${actor} ${actorNames})`;
+      fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, (rEmphasized ? ansiWrapper('\x1b[33m', log) : log) + '\n');
       return; // we cant match a log entry to a different type than that which was matched
     }
     
@@ -126,8 +130,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
       
       // write log to file
-      const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${actor} ${actorNames} ${action} the ${role} role\n${rEmphasized ? '\x1b[0m' : ''}`;
-      fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
+      const log = `[${ts}] ${actor} ${actorNames} ${action} the ${role} role`;
+      fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, (rEmphasized ? ansiWrapper('\x1b[33m', log) : log) + '\n');
     }
   }
   
