@@ -59,6 +59,76 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     this.omegga = omegga;
     this.config = config;
     this.store = store;
+    this.loggerCallback = this.loggerCallback.bind(this);
+  }
+  
+  async loggerCallback(logLine: string) {
+    const matchTimestamp = logLine.match(tsRegEx);
+    if (!matchTimestamp) return;
+    const ts = matchTimestamp[1];
+    
+    // match for user role log entry
+    const matchUser = logLine.match(rUserRegEx);
+    if (matchUser) {
+      // unpack named capture groups
+      const { target, targetp, actiont, role, action, actor } = matchUser.groups;
+      
+      // end early if the role is ignored and not emphasized
+      const rEmphasized = this.config.emphasize_roles.includes(role);
+      if (this.config.ignore_roles.includes(role) && !rEmphasized) return;
+      
+      // compile array of target usernames that have the given display name
+      let targetNames: string = undefined;
+      
+      if (!targetp) {
+        const targetPlayers = findPlayersByExactDisplayName(target);
+        targetNames = playerArrayToString(targetPlayers);
+      }
+      
+      // compile array of actor usernames that have the given display name
+      const actorPlayers = findPlayersByExactDisplayName(actor);
+      
+      // filter out players with insufficient permissions
+      // ! uncomment when missing permissions for default roles get inserted in getPermissions()
+      // actorPlayers.filter((player, _, __) => {
+      //   return player.getPermissions()['BR.Permission.GrantRoles'];
+      // });
+      
+      // construct string to display in log
+      const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
+      
+      // write log to file
+      const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${target}${targetp ?? ' ' + targetNames} ${actiont} ${role} (${action} by ${actor} ${actorNames})\n${rEmphasized ? '\x1b[0m' : ''}`;
+      fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
+      return; // we cant match a log entry to a different type than that which was matched
+    }
+    
+    // match for role management log entry
+    const matchManage = logLine.match(rManageRegEx);
+    if (matchManage) {
+      // unpack named capture groups
+      const { actor, action, role } = matchManage.groups;
+      
+      // end early if the role is ignored and not emphasized
+      const rEmphasized = this.config.emphasize_roles.includes(role);
+      if (this.config.ignore_roles.includes(role) && !rEmphasized) return;
+      
+      // compile array of actor usernames that have the given display name
+      const actorPlayers = findPlayersByExactDisplayName(actor);
+      
+      // filter out players with insufficient permissions
+      // ! uncomment when missing permissions for default roles get inserted in getPermissions()
+      // actorPlayers.filter((player, _, __) => {
+      //   return player.getPermissions()['BR.Permission.EditRoles'];
+      // });
+      
+      // construct string to display in log
+      const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
+      
+      // write log to file
+      const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${actor} ${actorNames} ${action} the ${role} role\n${rEmphasized ? '\x1b[0m' : ''}`;
+      fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
+    }
   }
   
   async init() {
@@ -72,80 +142,13 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     }
     
     // add listener to listen for brickadia log lines
-    this.omegga.on('line', (logLine) => {
-      const matchTimestamp = logLine.match(tsRegEx);
-      if (!matchTimestamp) return;
-      const ts = matchTimestamp[1];
-      
-      // match for user role log entry
-      const matchUser = logLine.match(rUserRegEx);
-      if (matchUser) {
-        // unpack named capture groups
-        const { target, targetp, actiont, role, action, actor } = matchUser.groups;
-        
-        // end early if the role is ignored and not emphasized
-        const rEmphasized = this.config.emphasize_roles.includes(role);
-        if (this.config.ignore_roles.includes(role) && !rEmphasized) return;
-        
-        // compile array of target usernames that have the given display name
-        let targetNames: string = undefined;
-        
-        if (!targetp) {
-          const targetPlayers = findPlayersByExactDisplayName(target);
-          targetNames = playerArrayToString(targetPlayers);
-        }
-        
-        // compile array of actor usernames that have the given display name
-        const actorPlayers = findPlayersByExactDisplayName(actor);
-        
-        // filter out players with insufficient permissions
-        // ! uncomment when missing permissions for default roles get inserted in getPermissions()
-        // actorPlayers.filter((player, _, __) => {
-        //   return player.getPermissions()['BR.Permission.GrantRoles'];
-        // });
-        
-        // construct string to display in log
-        const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
-        
-        // write log to file
-        const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${target}${targetp ?? ' ' + targetNames} ${actiont} ${role} (${action} by ${actor} ${actorNames})\n${rEmphasized ? '\x1b[0m' : ''}`;
-        fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
-        return; // we cant match a log entry to a different type than that which was matched
-      }
-      
-      // match for role management log entry
-      const matchManage = logLine.match(rManageRegEx);
-      if (matchManage) {
-        // unpack named capture groups
-        const { actor, action, role } = matchManage.groups;
-        
-        // end early if the role is ignored and not emphasized
-        const rEmphasized = this.config.emphasize_roles.includes(role);
-        if (this.config.ignore_roles.includes(role) && !rEmphasized) return;
-        
-        // compile array of actor usernames that have the given display name
-        const actorPlayers = findPlayersByExactDisplayName(actor);
-        
-        // filter out players with insufficient permissions
-        // ! uncomment when missing permissions for default roles get inserted in getPermissions()
-        // actorPlayers.filter((player, _, __) => {
-        //   return player.getPermissions()['BR.Permission.EditRoles'];
-        // });
-        
-        // construct string to display in log
-        const actorNames: string = actorPlayers.length !== 0 ? playerArrayToString(actorPlayers) : '[SERVER]';
-        
-        // write log to file
-        const log = `${rEmphasized ? '\x1b[33m' : ''}[${ts}] ${actor} ${actorNames} ${action} the ${role} role\n${rEmphasized ? '\x1b[0m' : ''}`;
-        fs.appendFileSync(logFolder + `${ts.substring(0, 10)}.log`, log);
-      }
-    });
+    this.omegga.on('line', this.loggerCallback);
     
     return {};
   }
   
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   async stop() {
-    
+    // clean up listener for no reason lol
+    this.omegga.off('line', this.loggerCallback);
   }
 }
