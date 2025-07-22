@@ -23,7 +23,7 @@ const rManageRegEx = /^.+LogChat: (?<actor>[^:]+?) (?<action>created|updated|rem
 
 // helper functions
 function findPlayersByExactDisplayName(name: string): OmeggaPlayer[] {
-  let result: OmeggaPlayer[] = Array<OmeggaPlayer>();
+  const result: OmeggaPlayer[] = Array<OmeggaPlayer>();
   
   for (const player of Omegga.players) {
     if (player.displayName !== name) continue;
@@ -60,7 +60,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   async init() {
     // create log folder if it doesnt exist
     if (!fs.existsSync(logFolder)) {
-      fs.mkdir(logFolder, { recursive: true }, err => {
+      fs.mkdir(logFolder, { recursive: true }, (err) => {
         if (!err) {
           console.log('Created log folder');
         }
@@ -68,7 +68,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     }
     
     // add listener to listen for brickadia log lines
-    this.omegga.on('line', logLine => {
+    this.omegga.on('line', (logLine) => {
       const matchTimestamp = logLine.match(tsRegEx);
       if (!matchTimestamp) return;
       const ts = matchTimestamp[1];
@@ -132,6 +132,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     return {};
   }
   
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   async stop() {
     
   }
