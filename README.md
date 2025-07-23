@@ -7,8 +7,13 @@ Logs include usernames (multiple if players shared display names) to find perpet
 
 ## Install & update
 
-`omegga install gh:joksulainen/rolelogger`
-`omegga update rolelogger`
+```bash
+# install
+omegga install gh:joksulainen/rolelogger
+
+# update
+omegga update rolelogger
+```
 
 ## Config
 
