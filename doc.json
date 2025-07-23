@@ -11,7 +11,7 @@
     "emphasize_roles": {
       "type": "list",
       "itemType": "role",
-      "description": "Roles that should be logged with more emphasis. Takes precedence over ignore.",
+      "description": "Roles that should be logged with emphasis. Takes precedence over ignore.",
       "default": []
     },
     "ignore_roles": {
