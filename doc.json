@@ -3,6 +3,11 @@
   "description": "A simple plugin that logs role events.",
   "author": "joksulainen",
   "config": {
+    "check_updates": {
+      "type": "boolean",
+      "description": "When enabled, the plugin checks for updates and notifies of them on init and then every 4 hours.",
+      "default": true
+    },
     "emphasize_roles": {
       "type": "list",
       "itemType": "role",
