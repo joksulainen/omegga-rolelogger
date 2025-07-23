@@ -12,7 +12,7 @@ type Config = {
 
 type Storage = {};
 
-// update notifier constants
+// update checker constants
 const PLUGIN_VERSION = '0.4.0';
 const GITHUB_URL = 'https://api.github.com/repos/joksulainen/omegga-rolelogger/releases/latest';
 
@@ -68,17 +68,17 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   omegga: OL;
   config: PC<Config>;
   store: PS<Storage>;
-  updateNotifierInterval: NodeJS.Timeout;
+  updateCheckerInterval: NodeJS.Timeout;
   
   constructor(omegga: OL, config: PC<Config>, store: PS<Storage>) {
     this.omegga = omegga;
     this.config = config;
     this.store = store;
     this.loggerCallback = this.loggerCallback.bind(this);
-    this.updateNotifierCallback = this.updateNotifierCallback.bind(this);
+    this.updateCheckerCallback = this.updateCheckerCallback.bind(this);
   }
   
-  async updateNotifierCallback() {
+  async updateCheckerCallback() {
     // fetch the latest release from github
     const data = await (await fetch(GITHUB_URL, { 
       headers: {
@@ -186,10 +186,10 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     // add listener to listen for brickadia log lines
     this.omegga.on('line', this.loggerCallback);
     
-    // add an interval for the update notifier if check_update config option is enabled and run the notifier once
+    // add an interval for the update checker if check_update config option is enabled and run the checker once
     if (this.config.check_updates) {
-      this.updateNotifierInterval = setInterval(this.updateNotifierCallback, 14400000); // every 4 hours: 4*60*60*1000
-      this.updateNotifierCallback();
+      this.updateCheckerInterval = setInterval(this.updateCheckerCallback, 14400000); // every 4 hours: 4*60*60*1000
+      this.updateCheckerCallback();
     }
     
     return {};
@@ -199,7 +199,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     // clean up listener for no reason lol
     this.omegga.off('line', this.loggerCallback);
     if (this.config.check_updates) {
-      clearInterval(this.updateNotifierInterval);
+      clearInterval(this.updateCheckerInterval);
     }
   }
 }
