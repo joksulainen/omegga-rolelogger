@@ -17,5 +17,5 @@ All config options configurable in omeggas web UI.
 | Config            | Type         | Default | Description |
 | ----------------- | ------------ | ------- | ----------- |
 | `check_updates`   | `boolean`    | `true`  | When enabled, the plugin checks for updates and notifies of them on init and then every 4 hours. |
-| `emphazise_roles` | `list[Role]` | `[]`    | Roles that should be logged with emphasis. Takes precedence over ignore. |
+| `emphasize_roles` | `list[Role]` | `[]`    | Roles that should be logged with emphasis. Takes precedence over ignore. |
 | `ignore_roles`    | `list[Role]` | `[]`    | Roles that shouldn't be logged. |
