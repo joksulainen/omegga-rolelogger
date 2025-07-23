@@ -60,8 +60,8 @@ function ansiWrapper(ansi: string, string: string): string {
   return ansi + string + '\x1b[0m';
 }
 
-function semverIsGreater(oldV: string, newV: string): boolean {
-  return newV.localeCompare(oldV, undefined, { numeric: true }) === 1;
+function semverIsGreater(a: string, b: string): boolean {
+  return a.localeCompare(b, undefined, { numeric: true }) === 1;
 }
 
 export default class Plugin implements OmeggaPlugin<Config, Storage> {
@@ -97,7 +97,7 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     
     // proceed if githubVersion is a string and is a greater semver than PLUGIN_VERSION
     if (typeof githubVersion !== 'string') return;
-    if (!semverIsGreater(PLUGIN_VERSION, githubVersion)) return;
+    if (!semverIsGreater(githubVersion, PLUGIN_VERSION)) return;
     
     // there is a newer version available on github, we should log it
     this.omegga.broadcast(`[<color="#AAFFAA">rolelogger</>]: A new version is available: ${PLUGIN_VERSION} -> ${githubVersion}`);
