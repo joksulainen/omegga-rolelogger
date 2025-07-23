@@ -61,7 +61,7 @@ function ansiWrapper(ansi: string, string: string): string {
 }
 
 function semverIsGreater(a: string, b: string): boolean {
-  return a.localeCompare(b, undefined, { numeric: true }) === 1;
+  return a.localeCompare(b, undefined, { numeric: true }) > 0;
 }
 
 export default class Plugin implements OmeggaPlugin<Config, Storage> {
