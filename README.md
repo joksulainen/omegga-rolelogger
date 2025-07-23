@@ -8,3 +8,13 @@ Logs include usernames (multiple if players shared display names) to find perpet
 ## Install
 
 `omegga install gh:joksulainen/rolelogger`
+
+## Config
+
+All config options configurable in Omeggas Web UI.
+
+| Config          | Type         | Default | Description |
+| :-------------- | :----------: | :-----: | :---------- |
+| check_updates   | boolean      | true    | When enabled, the plugin checks for updates and notifies of them on init and then every 4 hours. |
+| emphazise_roles | list\[Role\] | \[\]    | Roles that should be logged with more emphasis. Takes precedence over ignore. |
+| ignore_roles    | list\[Role\] | \[\]    | Roles that shouldn't be logged. |
