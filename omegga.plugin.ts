@@ -13,7 +13,7 @@ type Config = {
 type Storage = {};
 
 // update checker constants
-const PLUGIN_VERSION = '0.4.0';
+const PLUGIN_VERSION = '0.4.1';
 const GITHUB_URL = 'https://api.github.com/repos/joksulainen/omegga-rolelogger/releases/latest';
 
 // location for logs
