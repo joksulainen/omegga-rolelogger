@@ -1,20 +1,21 @@
-import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from 'omegga';
+import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer, PluginInterop } from 'omegga';
 import fs from 'fs';
-import fetch from 'node-fetch';
 
 
 // plugin config and storage
 type Config = {
-  check_updates: boolean
   ignore_roles: string[]
   emphasize_roles: string[]
 };
 
 type Storage = {};
 
-// update checker constants
-const PLUGIN_VERSION = '0.4.1';
-const GITHUB_URL = 'https://api.github.com/repos/joksulainen/omegga-rolelogger/releases/latest';
+// update checker info
+const UPDATE_INFO = {
+  version: '0.4.1',
+  api_type: 'github',
+  repo_info: { owner: 'joksulainen', repo: 'omegga-rolelogger' },
+};
 
 // location for logs
 const logFolder = './logs/roles/';
@@ -60,48 +61,20 @@ function ansiWrapper(ansi: string, string: string): string {
   return ansi + string + '\x1b[0m';
 }
 
-function semverIsGreater(a: string, b: string): boolean {
-  return a.localeCompare(b, undefined, { numeric: true }) > 0;
-}
-
 export default class Plugin implements OmeggaPlugin<Config, Storage> {
   omegga: OL;
   config: PC<Config>;
   store: PS<Storage>;
-  updateCheckerInterval: NodeJS.Timeout;
+  
+  updateCheckerPlugin: PluginInterop;
   
   constructor(omegga: OL, config: PC<Config>, store: PS<Storage>) {
     this.omegga = omegga;
     this.config = config;
     this.store = store;
+    
     this.loggerCallback = this.loggerCallback.bind(this);
-    this.updateCheckerCallback = this.updateCheckerCallback.bind(this);
-  }
-  
-  async updateCheckerCallback() {
-    // fetch the latest release from github
-    const data = await (await fetch(GITHUB_URL, { 
-      headers: {
-        'Accept': 'application/vnd.github+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    })).json();
-    
-    // we probably shouldnt continue if its a pre-release
-    if (data['prerelease']) return;
-    
-    // see if the tag name is a specific format and grab the semver of it, otherwise end early
-    const githubVersionMatch = ((data['tag_name'] as string).match(/^v((?:\d+)\.(?:\d+)\.(?:\d+))$/));
-    if (!githubVersionMatch) return;
-    const githubVersion = githubVersionMatch[1];
-    
-    // proceed if githubVersion is a string and is a greater semver than PLUGIN_VERSION
-    if (typeof githubVersion !== 'string') return;
-    if (!semverIsGreater(githubVersion, PLUGIN_VERSION)) return;
-    
-    // there is a newer version available on github, we should log it
-    this.omegga.broadcast(`[<color="#AAFFAA">rolelogger</>]: A new version is available: ${PLUGIN_VERSION} -> ${githubVersion}`);
-    console.info(`A new version is available: ${PLUGIN_VERSION} -> ${githubVersion}`);
+    this.ucReady = this.ucReady.bind(this);
   }
   
   async loggerCallback(logLine: string) {
@@ -173,6 +146,11 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     }
   }
   
+  async ucReady() {
+    this.updateCheckerPlugin = await this.omegga.getPlugin('update-checker');
+    this.updateCheckerPlugin.emitPlugin('hook', [UPDATE_INFO]);
+  }
+  
   async init() {
     // create log folder if it doesnt exist
     if (!fs.existsSync(logFolder)) {
@@ -186,11 +164,14 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     // add listener to listen for brickadia log lines
     this.omegga.on('line', this.loggerCallback);
     
-    // add an interval for the update checker if check_update config option is enabled and run the checker once
-    if (this.config.check_updates) {
-      this.updateCheckerInterval = setInterval(this.updateCheckerCallback, 14400000); // every 4 hours: 4*60*60*1000
-      this.updateCheckerCallback();
+    // hook into update-checker for updates
+    this.updateCheckerPlugin = await this.omegga.getPlugin('update-checker');
+    if (this.updateCheckerPlugin) {
+      this.updateCheckerPlugin.emitPlugin('hook', [UPDATE_INFO]);
     }
+    
+    // same thing but we know when the plugin exists
+    // ... if it could be done
     
     return {};
   }
@@ -198,8 +179,8 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   async stop() {
     // clean up listener for no reason lol
     this.omegga.off('line', this.loggerCallback);
-    if (this.config.check_updates) {
-      clearInterval(this.updateCheckerInterval);
+    if (this.updateCheckerPlugin) {
+      this.updateCheckerPlugin.emitPlugin('unhook', []);
     }
   }
 }
