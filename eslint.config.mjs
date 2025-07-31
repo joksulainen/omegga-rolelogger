@@ -2,18 +2,22 @@ import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import stylistic from '@stylistic/eslint-plugin';
+import { defineConfig } from 'eslint/config';
 
 
-export default tseslint.config(
+export default defineConfig(
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
     plugins: {
       js,
       '@typescript-eslint': tseslint.plugin,
-      '@stylistic': stylistic,
+      stylistic,
     },
     languageOptions: {
-      globals: globals.es2020,
+      globals: {
+        ...globals.es2020,
+        ...globals.browser,
+      },
     },
     extends: [
       js.configs.recommended,
