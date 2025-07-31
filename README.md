@@ -5,6 +5,8 @@ A simple [omegga](https://github.com/brickadia-community/omegga) plugin that log
 Logs can be found in `./logs/roles/` relative to the omegga instance.
 Logs include usernames (multiple if players shared display names) to find perpetrators easier.
 
+Hooks into [update-checker](https://github.com/joksulainen/omegga-update-checker) for update notifications.
+
 ## Install & update
 
 ```bash

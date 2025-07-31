@@ -1,4 +1,4 @@
-import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer, PluginInterop } from 'omegga';
+import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from 'omegga';
 import fs from 'fs';
 
 
@@ -65,8 +65,6 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
   omegga: OL;
   config: PC<Config>;
   store: PS<Storage>;
-  
-  updateCheckerPlugin: PluginInterop;
   
   constructor(omegga: OL, config: PC<Config>, store: PS<Storage>) {
     this.omegga = omegga;
@@ -146,10 +144,9 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
     }
   }
   
-  async ucReady() {
-    this.updateCheckerPlugin = await this.omegga.getPlugin('update-checker');
-    this.updateCheckerPlugin.emitPlugin('hook', [UPDATE_INFO]);
-  }
+  ucReady = async () => {
+    (await this.omegga.getPlugin('update-checker')).emitPlugin('hook', [UPDATE_INFO]);
+  };
   
   async init() {
     // create log folder if it doesnt exist
@@ -161,26 +158,28 @@ export default class Plugin implements OmeggaPlugin<Config, Storage> {
       });
     }
     
-    // add listener to listen for brickadia log lines
-    this.omegga.on('line', this.loggerCallback);
+    this.omegga
+      .on('line', this.loggerCallback) // add listener to listen for brickadia log lines
+      .on('uc:ready', this.ucReady); // add listener to know when update-checker exists
     
     // hook into update-checker for updates
-    this.updateCheckerPlugin = await this.omegga.getPlugin('update-checker');
-    if (this.updateCheckerPlugin) {
-      this.updateCheckerPlugin.emitPlugin('hook', [UPDATE_INFO]);
+    const ucPlugin = await this.omegga.getPlugin('update-checker');
+    if (ucPlugin) {
+      ucPlugin.emitPlugin('hook', [UPDATE_INFO]);
     }
-    
-    // same thing but we know when the plugin exists
-    // ... if it could be done
     
     return {};
   }
   
   async stop() {
     // clean up listener for no reason lol
-    this.omegga.off('line', this.loggerCallback);
-    if (this.updateCheckerPlugin) {
-      this.updateCheckerPlugin.emitPlugin('unhook', []);
+    this.omegga
+      .off('line', this.loggerCallback)
+      .off('uc:ready', this.ucReady);
+    // unhook from update-checker
+    const ucPlugin = await this.omegga.getPlugin('update-checker');
+    if (ucPlugin) {
+      ucPlugin.emitPlugin('unhook', undefined);
     }
   }
 }
