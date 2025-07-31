@@ -17,6 +17,7 @@ export default defineConfig(
       globals: {
         ...globals.es2020,
         ...globals.browser,
+        ...globals.commonjs,
       },
     },
     extends: [
