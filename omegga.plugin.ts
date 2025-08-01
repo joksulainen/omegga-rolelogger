@@ -61,7 +61,7 @@ function ansiWrapper(ansi: string, string: string): string {
   return ansi + string + '\x1b[0m';
 }
 
-export default class Plugin implements OmeggaPlugin<Config, Storage> {
+export default class RoleLogger implements OmeggaPlugin<Config, Storage> {
   omegga: OL;
   config: PC<Config>;
   store: PS<Storage>;
