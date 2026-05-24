@@ -1,21 +1,15 @@
-import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from 'omegga';
-import fs from 'fs';
+import fs from 'node:fs';
+
+import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from './omegga';
 
 
 // plugin config and storage
 type Config = {
-  ignore_roles: string[]
-  emphasize_roles: string[]
+  ignore_roles: string[],
+  emphasize_roles: string[],
 };
 
 type Storage = {};
-
-// update checker info
-const UPDATE_INFO = {
-  version: '0.4.1',
-  api_type: 'github',
-  repo_info: { owner: 'joksulainen', repo: 'omegga-rolelogger' },
-};
 
 // location for logs
 const logFolder = './logs/roles/';
@@ -72,7 +66,6 @@ export default class RoleLogger implements OmeggaPlugin<Config, Storage> {
     this.store = store;
     
     this.loggerCallback = this.loggerCallback.bind(this);
-    this.ucReady = this.ucReady.bind(this);
   }
   
   async loggerCallback(logLine: string) {
@@ -91,7 +84,7 @@ export default class RoleLogger implements OmeggaPlugin<Config, Storage> {
       if (this.config.ignore_roles.includes(role) && !rEmphasized) return;
       
       // compile array of target usernames that have the given display name
-      let targetNames: string = undefined;
+      let targetNames: string | undefined = undefined;
       
       if (!targetp) {
         const targetPlayers = findPlayersByExactDisplayName(target);
@@ -144,10 +137,6 @@ export default class RoleLogger implements OmeggaPlugin<Config, Storage> {
     }
   }
   
-  ucReady = async () => {
-    (await this.omegga.getPlugin('update-checker')).emitPlugin('hook', [UPDATE_INFO]);
-  };
-  
   async init() {
     // create log folder if it doesnt exist
     if (!fs.existsSync(logFolder)) {
@@ -158,28 +147,14 @@ export default class RoleLogger implements OmeggaPlugin<Config, Storage> {
       });
     }
     
-    this.omegga
-      .on('line', this.loggerCallback) // add listener to listen for brickadia log lines
-      .on('uc:ready', this.ucReady); // add listener to know when update-checker exists
-    
-    // hook into update-checker for updates
-    const ucPlugin = await this.omegga.getPlugin('update-checker');
-    if (ucPlugin) {
-      ucPlugin.emitPlugin('hook', [UPDATE_INFO]);
-    }
+    // add listener to listen for brickadia log lines
+    this.omegga.on('line', this.loggerCallback);
     
     return {};
   }
   
   async stop() {
     // clean up listener for no reason lol
-    this.omegga
-      .off('line', this.loggerCallback)
-      .off('uc:ready', this.ucReady);
-    // unhook from update-checker
-    const ucPlugin = await this.omegga.getPlugin('update-checker');
-    if (ucPlugin) {
-      ucPlugin.emitPlugin('unhook', undefined);
-    }
+    this.omegga.off('line', this.loggerCallback);
   }
 }
