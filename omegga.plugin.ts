@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from './omegga';
+import { OmeggaPlugin, OL, PS, PC, OmeggaPlayer } from '@/omegga';
 
 
 // plugin config and storage
